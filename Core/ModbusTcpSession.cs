@@ -23,17 +23,19 @@ namespace Modbus.Core
                 .SetFunctionCode(functionCode)
                 .SetObject(data);
 
-            builder
-                .SetTransactionId(_transactionId++)
-                .SetProtocolId(PROTOCOL_ID)
-                .AutoComputeLength();
-
             return SendRequest<T>(builder);
         }
 
         public Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct
         {
-            var request = builder.Build();
+            var tcpBuilder = (TcpRequest.Builder)builder;
+
+            tcpBuilder
+                .SetTransactionId(_transactionId++)
+                .SetProtocolId(PROTOCOL_ID)
+                .AutoComputeLength();
+
+            var request = tcpBuilder.Build();
 
             var responseBytes =
                 _modbusProtocol.SendForResult(request.RequestBytes, TcpResponse<T>.ComputeResponseBytesLength());
