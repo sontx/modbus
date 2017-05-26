@@ -24,8 +24,37 @@ namespace Modbus.Core.Converters
                 if ((field.Attribute.Endianness == Endianness.BigEndian && BitConverter.IsLittleEndian) ||
                     (field.Attribute.Endianness == Endianness.LittleEndian && !BitConverter.IsLittleEndian))
                 {
-                    Array.Reverse(data, field.Offset, Marshal.SizeOf(field.Field.FieldType));
+                    if (field.Field.FieldType.IsArray)
+                    {
+                        var marshalAs = (MarshalAsAttribute)field.Field.GetCustomAttributes(typeof(MarshalAsAttribute), false)[0];
+                        var elementSize = GetSize(marshalAs.ArraySubType);
+                        var elementCount = marshalAs.SizeConst;
+                        for (var i = 0; i < elementCount; ++i)
+                        {
+                            Array.Reverse(data, field.Offset + i * elementSize, elementSize);
+                        }
+                    }
+                    else
+                    {
+                        Array.Reverse(data, field.Offset, Marshal.SizeOf(field.Field.FieldType));
+                    }
                 }
+            }
+        }
+
+        private static int GetSize(UnmanagedType unmanagedType)
+        {
+            switch (unmanagedType)
+            {
+                case UnmanagedType.I1:
+                case UnmanagedType.U1: return 1;
+                case UnmanagedType.I2:
+                case UnmanagedType.U2: return 2;
+                case UnmanagedType.I4:
+                case UnmanagedType.U4: return 4;
+                case UnmanagedType.I8:
+                case UnmanagedType.U8: return 8;
+                default: throw new NotImplementedException();
             }
         }
 
