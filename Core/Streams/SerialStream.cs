@@ -35,9 +35,9 @@ namespace Modbus.Core.Streams
         {
             lock (this)
             {
+                _serialPort.DiscardInBuffer();
                 _serialPort.Write(buffer, offset, length);
                 _serialPort.BaseStream.Flush();
-                _serialPort.DiscardInBuffer();
             }
         }
 
