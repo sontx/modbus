@@ -1,4 +1,5 @@
-﻿using Modbus.Core.Exceptions;
+﻿using System.Threading.Tasks;
+using Modbus.Core.Exceptions;
 
 namespace Modbus.Core
 {
@@ -32,6 +33,11 @@ namespace Modbus.Core
             CheckResponse(slaveAddress, functionCode, responseBytes, response);
 
             return response;
+        }
+
+        public Task<Response<T>> SendRequestAsync<T>(int slaveAddress, int functionCode, object data) where T : struct
+        {
+            return Task.Run(() => SendRequest<T>(slaveAddress, functionCode, data));
         }
 
         private void CheckResponse<T>(int slaveAddress, int functionCode, byte[] responseBytes, Response<T> response)
