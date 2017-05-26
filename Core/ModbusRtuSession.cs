@@ -1,5 +1,6 @@
-﻿using System.Threading.Tasks;
+﻿using System;
 using Modbus.Core.Exceptions;
+using System.Threading.Tasks;
 
 namespace Modbus.Core
 {
@@ -20,6 +21,11 @@ namespace Modbus.Core
                 .SetObject(data)
                 .Build();
 
+            return SendRequest<T>(request);
+        }
+
+        public Response<T> SendRequest<T>(Request request) where T : struct
+        {
             var responseBytes =
                 _modbusProtocol.SendForResult(request.RequestBytes, RtuResponse<T>.ComputeResponseBytesLength());
 
@@ -30,7 +36,7 @@ namespace Modbus.Core
                 .SetResponseBytes(responseBytes)
                 .Build();
 
-            CheckResponse(slaveAddress, functionCode, responseBytes, response);
+            CheckResponse(request, responseBytes, response);
 
             return response;
         }
@@ -40,15 +46,20 @@ namespace Modbus.Core
             return Task.Run(() => SendRequest<T>(slaveAddress, functionCode, data));
         }
 
-        private void CheckResponse<T>(int slaveAddress, int functionCode, byte[] responseBytes, Response<T> response)
+        public Task<Response<T>> SendRequestAsync<T>(Request request) where T : struct
+        {
+            return Task.Run(() => SendRequest<T>(request));
+        }
+
+        private void CheckResponse<T>(Request request, byte[] responseBytes, Response<T> response)
             where T : struct
         {
             Checksum<T>(responseBytes);
 
-            if (slaveAddress != response.SlaveAddress)
-                throw new MismatchDataException("Response slave address mismatch with " + slaveAddress);
-            if (functionCode != response.FunctionCode)
-                throw new MismatchDataException("Response function code mismatch with " + functionCode);
+            if (request.SlaveAddress != response.SlaveAddress)
+                throw new MismatchDataException("Response slave address mismatch with " + request.SlaveAddress);
+            if (request.FunctionCode != response.FunctionCode)
+                throw new MismatchDataException("Response function code mismatch with " + request.FunctionCode);
         }
 
         private void Checksum<T>(byte[] responseBytes) where T : struct

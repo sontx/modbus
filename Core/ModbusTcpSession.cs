@@ -29,6 +29,11 @@ namespace Modbus.Core
                 .AutoComputeLength()
                 .Build();
 
+            return SendRequest<T>(request);
+        }
+
+        public Response<T> SendRequest<T>(Request request) where T : struct
+        {
             var responseBytes =
                 _modbusProtocol.SendForResult(request.RequestBytes, TcpResponse<T>.ComputeResponseBytesLength());
 
@@ -39,7 +44,7 @@ namespace Modbus.Core
                 .SetResponseBytes(responseBytes)
                 .Build();
 
-            CheckResponse(slaveAddress, functionCode, response);
+            CheckResponse(request, response);
 
             return response;
         }
@@ -49,7 +54,12 @@ namespace Modbus.Core
             return Task.Run(() => SendRequest<T>(slaveAddress, functionCode, data));
         }
 
-        private void CheckResponse<T>(int slaveAddress, int functionCode, TcpResponse<T> response) where T : struct
+        public Task<Response<T>> SendRequestAsync<T>(Request request) where T : struct
+        {
+            return Task.Run(() => SendRequest<T>(request));
+        }
+
+        private void CheckResponse<T>(Request request, TcpResponse<T> response) where T : struct
         {
             if (_transactionId != response.TransactionId)
                 throw new DataCorruptedException("Response transaction id does not match " + _transactionId);
@@ -57,10 +67,10 @@ namespace Modbus.Core
                 throw new DataCorruptedException("Response protocol id does not match " + PROTOCOL_ID);
             if (response.ComputeMessageLength() != response.Length)
                 throw new DataCorruptedException("Actual message bytes length does not match " + response.Length);
-            if (slaveAddress != response.SlaveAddress)
-                throw new MismatchDataException("Response slave address mismatch " + slaveAddress);
-            if (functionCode != response.FunctionCode)
-                throw new MismatchDataException("Response function code mismatch " + functionCode);
+            if (request.SlaveAddress != response.SlaveAddress)
+                throw new MismatchDataException("Response slave address mismatch " + request.SlaveAddress);
+            if (request.FunctionCode != response.FunctionCode)
+                throw new MismatchDataException("Response function code mismatch " + request.FunctionCode);
         }
     }
 }
