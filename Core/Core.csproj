@@ -59,6 +59,8 @@
     <Compile Include="Request.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="RtuRequest.cs" />
+    <Compile Include="TcpRequestFactory.cs" />
+    <Compile Include="RequestBuilderFactory.cs" />
     <Compile Include="RtuResponse.cs" />
     <Compile Include="Streams\BroadcastTcpStream.cs" />
     <Compile Include="Streams\IBroadcastStream.cs" />

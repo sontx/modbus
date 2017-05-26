@@ -23,17 +23,18 @@ namespace Modbus.Core
                 .SetFunctionCode(functionCode)
                 .SetObject(data);
 
-            var request = builder
+            builder
                 .SetTransactionId(_transactionId++)
                 .SetProtocolId(PROTOCOL_ID)
-                .AutoComputeLength()
-                .Build();
+                .AutoComputeLength();
 
-            return SendRequest<T>(request);
+            return SendRequest<T>(builder);
         }
 
-        public Response<T> SendRequest<T>(Request request) where T : struct
+        public Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct
         {
+            var request = builder.Build();
+
             var responseBytes =
                 _modbusProtocol.SendForResult(request.RequestBytes, TcpResponse<T>.ComputeResponseBytesLength());
 
@@ -54,9 +55,9 @@ namespace Modbus.Core
             return Task.Run(() => SendRequest<T>(slaveAddress, functionCode, data));
         }
 
-        public Task<Response<T>> SendRequestAsync<T>(Request request) where T : struct
+        public Task<Response<T>> SendRequestAsync<T>(Request.BuilderBase builder) where T : struct
         {
-            return Task.Run(() => SendRequest<T>(request));
+            return Task.Run(() => SendRequest<T>(builder));
         }
 
         private void CheckResponse<T>(Request request, TcpResponse<T> response) where T : struct

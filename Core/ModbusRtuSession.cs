@@ -1,5 +1,4 @@
-﻿using System;
-using Modbus.Core.Exceptions;
+﻿using Modbus.Core.Exceptions;
 using System.Threading.Tasks;
 
 namespace Modbus.Core
@@ -15,17 +14,18 @@ namespace Modbus.Core
 
         public Response<T> SendRequest<T>(int slaveAddress, int functionCode, object data) where T : struct
         {
-            var request = new RtuRequest.Builder()
+            var builder = new RtuRequest.Builder()
                 .SetSlaveAddress(slaveAddress)
                 .SetFunctionCode(functionCode)
-                .SetObject(data)
-                .Build();
+                .SetObject(data);
 
-            return SendRequest<T>(request);
+            return SendRequest<T>(builder);
         }
 
-        public Response<T> SendRequest<T>(Request request) where T : struct
+        public Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct
         {
+            var request = builder.Build();
+
             var responseBytes =
                 _modbusProtocol.SendForResult(request.RequestBytes, RtuResponse<T>.ComputeResponseBytesLength());
 
@@ -46,9 +46,9 @@ namespace Modbus.Core
             return Task.Run(() => SendRequest<T>(slaveAddress, functionCode, data));
         }
 
-        public Task<Response<T>> SendRequestAsync<T>(Request request) where T : struct
+        public Task<Response<T>> SendRequestAsync<T>(Request.BuilderBase builder) where T : struct
         {
-            return Task.Run(() => SendRequest<T>(request));
+            return Task.Run(() => SendRequest<T>(builder));
         }
 
         private void CheckResponse<T>(Request request, byte[] responseBytes, Response<T> response)
