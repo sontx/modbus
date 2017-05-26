@@ -4,7 +4,7 @@ using System.Net.Sockets;
 
 namespace Modbus.Core
 {
-    public static class ModbusFactory
+    public static class ModbusSessionFactory
     {
         public static IModbusSession CreateRtuSession(SerialPort serialPort)
         {
