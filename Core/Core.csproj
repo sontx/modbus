@@ -50,6 +50,7 @@
     <Compile Include="Exceptions\MismatchDataException.cs" />
     <Compile Include="Exceptions\MissingDataException.cs" />
     <Compile Include="IModbusProtocol.cs" />
+    <Compile Include="ModbusFactory.cs" />
     <Compile Include="ModbusProtocolImpl.cs" />
     <Compile Include="IModbusSession.cs" />
     <Compile Include="ModbusTcpSession.cs" />
