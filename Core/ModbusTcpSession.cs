@@ -1,4 +1,5 @@
-﻿using Modbus.Core.Exceptions;
+﻿using System;
+using Modbus.Core.Exceptions;
 using System.Threading.Tasks;
 
 namespace Modbus.Core
@@ -8,18 +9,34 @@ namespace Modbus.Core
         private static readonly int PROTOCOL_ID = 0;
 
         private readonly IModbusProtocol _modbusProtocol;
+        private int _slaveAddress;
         private ushort _transactionId;
 
-        public ModbusTcpSession(IModbusProtocol modbusProtocol)
+        public ModbusTcpSession(IModbusProtocol modbusProtocol, int slaveAddress)
         {
             _modbusProtocol = modbusProtocol;
+            this._slaveAddress = slaveAddress;
             _transactionId = 0;
         }
 
-        public Response<T> SendRequest<T>(int slaveAddress, int functionCode, object data) where T : struct
+        internal ModbusTcpSession(IModbusProtocol modbusProtocol)
         {
+            _modbusProtocol = modbusProtocol;
+            this._slaveAddress = Constants.UndefinedSlaveAddress;
+            _transactionId = 0;
+        }
+
+        internal void SetSlaveAddress(int slaveAddress)
+        {
+            this._slaveAddress = slaveAddress;
+        }
+
+        public Response<T> SendRequest<T>(int functionCode, object data) where T : struct
+        {
+            if (_slaveAddress == Constants.UndefinedSlaveAddress)
+                throw new InvalidOperationException("Slave address must be defined");
+
             var builder = (TcpRequest.Builder)new TcpRequest.Builder()
-                .SetSlaveAddress(slaveAddress)
                 .SetFunctionCode(functionCode)
                 .SetObject(data);
 
@@ -28,6 +45,9 @@ namespace Modbus.Core
 
         public Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct
         {
+            if (_slaveAddress != Constants.UndefinedSlaveAddress)
+                builder.SetSlaveAddress(_slaveAddress);
+
             var tcpBuilder = (TcpRequest.Builder)builder;
 
             tcpBuilder
@@ -52,9 +72,9 @@ namespace Modbus.Core
             return response;
         }
 
-        public Task<Response<T>> SendRequestAsync<T>(int slaveAddress, int functionCode, object data) where T : struct
+        public Task<Response<T>> SendRequestAsync<T>(int functionCode, object data) where T : struct
         {
-            return Task.Run(() => SendRequest<T>(slaveAddress, functionCode, data));
+            return Task.Run(() => SendRequest<T>(functionCode, data));
         }
 
         public Task<Response<T>> SendRequestAsync<T>(Request.BuilderBase builder) where T : struct

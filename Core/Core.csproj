@@ -37,6 +37,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Checksum.cs" />
+    <Compile Include="Constants.cs" />
     <Compile Include="Converters\EndianAttribute.cs" />
     <Compile Include="Converters\BytesNumeric.cs" />
     <Compile Include="Converters\BytesStructure.cs" />
@@ -46,10 +47,13 @@
     <Compile Include="DataTypes\RequestFunc04.cs" />
     <Compile Include="DataTypes\RequestFunc05.cs" />
     <Compile Include="DataTypes\RequestFunc06.cs" />
+    <Compile Include="DefaultHandshake.cs" />
     <Compile Include="Exceptions\DataCorruptedException.cs" />
     <Compile Include="Exceptions\MismatchDataException.cs" />
     <Compile Include="Exceptions\MissingDataException.cs" />
+    <Compile Include="HandshakeFunc.cs" />
     <Compile Include="IModbusProtocol.cs" />
+    <Compile Include="ModbusFwdSession.cs" />
     <Compile Include="ModbusSessionFactory.cs" />
     <Compile Include="ModbusProtocolImpl.cs" />
     <Compile Include="IModbusSession.cs" />

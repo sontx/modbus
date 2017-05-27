@@ -12,10 +12,10 @@ namespace Modbus.Core
             return (Request.BuilderBase)Activator.CreateInstance(builderType);
         }
 
-        public static Request.BuilderBase CreateRequest01<T>(int slaveAddress, int coilAddress, int numberOfCoils) where T : Request
+        public static Request.BuilderBase CreateRequest01<T>(int coilAddress, int numberOfCoils) where T : Request
         {
             return CreateBuilder<T>()
-                .SetSlaveAddress(slaveAddress)
+
                 .SetFunctionCode(1)
                 .SetObject(new RequestFunc01
                 {
@@ -24,10 +24,10 @@ namespace Modbus.Core
                 });
         }
 
-        public static Request.BuilderBase CreateRequest02<T>(int slaveAddress, int inputAddress, int numberOfCoils) where T : Request
+        public static Request.BuilderBase CreateRequest02<T>(int inputAddress, int numberOfCoils) where T : Request
         {
             return CreateBuilder<T>()
-                .SetSlaveAddress(slaveAddress)
+
                 .SetFunctionCode(2)
                 .SetObject(new RequestFunc02
                 {
@@ -36,10 +36,10 @@ namespace Modbus.Core
                 });
         }
 
-        public static Request.BuilderBase CreateRequest03<T>(int slaveAddress, int registerAddress, int numberOfRegisters) where T : Request
+        public static Request.BuilderBase CreateRequest03<T>(int registerAddress, int numberOfRegisters) where T : Request
         {
             return CreateBuilder<T>()
-                .SetSlaveAddress(slaveAddress)
+
                 .SetFunctionCode(3)
                 .SetObject(new RequestFunc03
                 {
@@ -48,10 +48,10 @@ namespace Modbus.Core
                 });
         }
 
-        public static Request.BuilderBase CreateRequest04<T>(int slaveAddress, int registerAddress, int numberOfRegisters) where T : Request
+        public static Request.BuilderBase CreateRequest04<T>(int registerAddress, int numberOfRegisters) where T : Request
         {
             return CreateBuilder<T>()
-                .SetSlaveAddress(slaveAddress)
+
                 .SetFunctionCode(4)
                 .SetObject(new RequestFunc04
                 {
@@ -60,10 +60,10 @@ namespace Modbus.Core
                 });
         }
 
-        public static Request.BuilderBase CreateRequest05<T>(int slaveAddress, int coilAddress, int status) where T : Request
+        public static Request.BuilderBase CreateRequest05<T>(int coilAddress, int status) where T : Request
         {
             return CreateBuilder<T>()
-                .SetSlaveAddress(slaveAddress)
+
                 .SetFunctionCode(5)
                 .SetObject(new RequestFunc05
                 {
@@ -72,10 +72,10 @@ namespace Modbus.Core
                 });
         }
 
-        public static Request.BuilderBase CreateRequest06<T>(int slaveAddress, int registerAddress, int value) where T : Request
+        public static Request.BuilderBase CreateRequest06<T>(int registerAddress, int value) where T : Request
         {
             return CreateBuilder<T>()
-                .SetSlaveAddress(slaveAddress)
+
                 .SetFunctionCode(6)
                 .SetObject(new RequestFunc06
                 {

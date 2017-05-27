@@ -1,4 +1,5 @@
-﻿using Modbus.Core.Exceptions;
+﻿using System;
+using Modbus.Core.Exceptions;
 using System.Threading.Tasks;
 
 namespace Modbus.Core
@@ -6,16 +7,20 @@ namespace Modbus.Core
     public sealed class ModbusRtuSession : IModbusSession
     {
         private readonly IModbusProtocol _modbusProtocol;
+        private readonly int _slaveAddress;
 
-        public ModbusRtuSession(IModbusProtocol modbusProtocol)
+        public ModbusRtuSession(IModbusProtocol modbusProtocol, int slaveAddress)
         {
             _modbusProtocol = modbusProtocol;
+            this._slaveAddress = slaveAddress;
         }
 
-        public Response<T> SendRequest<T>(int slaveAddress, int functionCode, object data) where T : struct
+        public Response<T> SendRequest<T>(int functionCode, object data) where T : struct
         {
+            if (_slaveAddress == Constants.UndefinedSlaveAddress)
+                throw new InvalidOperationException("Slave address must be defined");
+
             var builder = new RtuRequest.Builder()
-                .SetSlaveAddress(slaveAddress)
                 .SetFunctionCode(functionCode)
                 .SetObject(data);
 
@@ -24,6 +29,9 @@ namespace Modbus.Core
 
         public Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct
         {
+            if (_slaveAddress != Constants.UndefinedSlaveAddress)
+                builder.SetSlaveAddress(_slaveAddress);
+
             var request = builder.Build();
 
             var responseBytes =
@@ -41,9 +49,9 @@ namespace Modbus.Core
             return response;
         }
 
-        public Task<Response<T>> SendRequestAsync<T>(int slaveAddress, int functionCode, object data) where T : struct
+        public Task<Response<T>> SendRequestAsync<T>(int functionCode, object data) where T : struct
         {
-            return Task.Run(() => SendRequest<T>(slaveAddress, functionCode, data));
+            return Task.Run(() => SendRequest<T>(functionCode, data));
         }
 
         public Task<Response<T>> SendRequestAsync<T>(Request.BuilderBase builder) where T : struct

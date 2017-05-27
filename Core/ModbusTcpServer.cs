@@ -15,12 +15,12 @@ namespace Modbus.Core
             _tcpListener = new TcpListener(endPoint);
         }
 
-        public Task WaitForConnectionsAsync(Action<IModbusSession> onAcceptAction)
+        public Task WaitForConnectionsAsync(Action<IModbusSession> onAcceptAction, HandshakeFunc<DefaultHandshake> handshakeFunc)
         {
             return Task.Run(async () =>
             {
                 var listner = _tcpListener;
-                if (listner == null || onAcceptAction == null)
+                if (listner == null || onAcceptAction == null || handshakeFunc == null)
                     return;
 
                 listner.Start();
@@ -28,7 +28,16 @@ namespace Modbus.Core
                 {
                     var tcpClient = await listner.AcceptTcpClientAsync();
                     var modbusSession = ModbusSessionFactory.CreateTcpSession(tcpClient);
-                    onAcceptAction.Invoke(modbusSession);
+                    var handshake = handshakeFunc.Invoke(modbusSession);
+                    if (handshake != null)
+                    {
+                        ((ModbusTcpSession)modbusSession).SetSlaveAddress(handshake.SlaveAddress);
+                        onAcceptAction.Invoke(modbusSession);
+                    }
+                    else
+                    {
+                        modbusSession.Dispose();
+                    }
                 }
             });
         }

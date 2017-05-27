@@ -37,6 +37,12 @@ namespace Modbus.Core
                 return this;
             }
 
+            public BuilderBase SetDataBytes(byte[] dataBytes)
+            {
+                this.data = dataBytes;
+                return this;
+            }
+
             public BuilderBase SetObject(object structObj)
             {
                 data = BytesStructure.ToBytes(structObj);
