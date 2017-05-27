@@ -3,6 +3,18 @@ using System.Threading.Tasks;
 
 namespace Modbus.Core
 {
+    /// <summary>
+    /// Master ---request1-> parent slave ---request2--> child slave.
+    /// Master +--response-- parent slave +--response--- child slave.
+    ///<para/>
+    /// We have two requests are request1(request to parent slave) and
+    /// request2(which we want to request to child slave). Request1 will carry
+    /// request2 bytes in data segment.
+    /// <para/>
+    /// Parent slave should forward whole data segment
+    /// to child slave, after child slave responsed, parent slave should forward whole
+    /// response bytes that received from child slave to master.
+    /// </summary>
     public sealed class ModbusFwdSession : IModbusSession
     {
         private readonly IModbusSession _modbusSession;
