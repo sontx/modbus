@@ -18,7 +18,7 @@ namespace Modbus.Core
 
         public int ComputeMessageLength()
         {
-            return ResponseBytes.Length - 8;
+            return ResponseBytes.Length - 6;
         }
 
         private TcpResponse()
