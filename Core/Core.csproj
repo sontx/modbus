@@ -53,6 +53,7 @@
     <Compile Include="ModbusSessionFactory.cs" />
     <Compile Include="ModbusProtocolImpl.cs" />
     <Compile Include="IModbusSession.cs" />
+    <Compile Include="ModbusTcpServer.cs" />
     <Compile Include="ModbusTcpSession.cs" />
     <Compile Include="ModbusRtuSession.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
