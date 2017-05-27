@@ -75,5 +75,10 @@ namespace Modbus.Core
             if (request.FunctionCode != response.FunctionCode)
                 throw new MismatchDataException("Response function code mismatch " + request.FunctionCode);
         }
+
+        public void Dispose()
+        {
+            _modbusProtocol?.Dispose();
+        }
     }
 }

@@ -70,5 +70,10 @@ namespace Modbus.Core
             }
             return null;
         }
+
+        public void Dispose()
+        {
+            _stream?.Dispose();
+        }
     }
 }

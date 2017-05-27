@@ -68,5 +68,10 @@ namespace Modbus.Core
             if (crc16[0] != responseBytes[responseBytes.Length - 2] || crc16[1] != responseBytes[responseBytes.Length - 1])
                 throw new DataCorruptedException("Checksum fail");
         }
+
+        public void Dispose()
+        {
+            _modbusProtocol?.Dispose();
+        }
     }
 }
