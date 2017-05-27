@@ -64,6 +64,7 @@
     <Compile Include="Request.cs" />
     <Compile Include="Response.cs" />
     <Compile Include="RtuRequest.cs" />
+    <Compile Include="SessionState.cs" />
     <Compile Include="TcpRequestFactory.cs" />
     <Compile Include="RequestBuilderFactory.cs" />
     <Compile Include="RtuResponse.cs" />

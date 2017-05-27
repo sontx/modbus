@@ -9,15 +9,21 @@ namespace Modbus.Core
         private readonly IModbusProtocol _modbusProtocol;
         private readonly int _slaveAddress;
 
+        public SessionState State { get; private set; }
+
         public ModbusRtuSession(IModbusProtocol modbusProtocol, int slaveAddress)
         {
             _modbusProtocol = modbusProtocol;
             this._slaveAddress = slaveAddress;
+
+            State = slaveAddress != Constants.UndefinedSlaveAddress
+                ? SessionState.Identified
+                : SessionState.Unidentified;
         }
 
         public Response<T> SendRequest<T>(int functionCode, object data) where T : struct
         {
-            if (_slaveAddress == Constants.UndefinedSlaveAddress)
+            if (State == SessionState.Unidentified)
                 throw new InvalidOperationException("Slave address must be defined");
 
             var builder = new RtuRequest.Builder()
@@ -29,7 +35,10 @@ namespace Modbus.Core
 
         public Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct
         {
-            if (_slaveAddress != Constants.UndefinedSlaveAddress)
+            if (State == SessionState.Expired)
+                throw new InvalidOperationException("This session already expired");
+
+            if (State == SessionState.Identified)
                 builder.SetSlaveAddress(_slaveAddress);
 
             var request = builder.Build();
@@ -79,6 +88,7 @@ namespace Modbus.Core
 
         public void Dispose()
         {
+            State = SessionState.Expired;
             _modbusProtocol?.Dispose();
         }
     }

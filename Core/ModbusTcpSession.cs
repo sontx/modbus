@@ -12,11 +12,17 @@ namespace Modbus.Core
         private int _slaveAddress;
         private ushort _transactionId;
 
+        public SessionState State { get; private set; }
+
         public ModbusTcpSession(IModbusProtocol modbusProtocol, int slaveAddress)
         {
             _modbusProtocol = modbusProtocol;
             this._slaveAddress = slaveAddress;
             _transactionId = 0;
+
+            State = slaveAddress != Constants.UndefinedSlaveAddress
+                ? SessionState.Identified
+                : SessionState.Unidentified;
         }
 
         internal ModbusTcpSession(IModbusProtocol modbusProtocol)
@@ -24,16 +30,21 @@ namespace Modbus.Core
             _modbusProtocol = modbusProtocol;
             this._slaveAddress = Constants.UndefinedSlaveAddress;
             _transactionId = 0;
+            State = SessionState.Unidentified;
         }
 
         internal void SetSlaveAddress(int slaveAddress)
         {
             this._slaveAddress = slaveAddress;
+
+            State = slaveAddress != Constants.UndefinedSlaveAddress
+                ? SessionState.Identified
+                : SessionState.Unidentified;
         }
 
         public Response<T> SendRequest<T>(int functionCode, object data) where T : struct
         {
-            if (_slaveAddress == Constants.UndefinedSlaveAddress)
+            if (State == SessionState.Unidentified)
                 throw new InvalidOperationException("Slave address must be defined");
 
             var builder = (TcpRequest.Builder)new TcpRequest.Builder()
@@ -45,7 +56,10 @@ namespace Modbus.Core
 
         public Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct
         {
-            if (_slaveAddress != Constants.UndefinedSlaveAddress)
+            if (State == SessionState.Expired)
+                throw new InvalidOperationException("This session already expired");
+
+            if (State == SessionState.Identified)
                 builder.SetSlaveAddress(_slaveAddress);
 
             var tcpBuilder = (TcpRequest.Builder)builder;
@@ -100,6 +114,7 @@ namespace Modbus.Core
 
         public void Dispose()
         {
+            State = SessionState.Expired;
             _modbusProtocol?.Dispose();
         }
     }

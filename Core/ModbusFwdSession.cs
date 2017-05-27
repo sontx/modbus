@@ -8,6 +8,8 @@ namespace Modbus.Core
         private readonly IModbusSession _modbusSession;
         private readonly Settings _settings;
 
+        public SessionState State { get; private set; }
+
         public ModbusFwdSession(IModbusProtocol modbusProtocol, Settings settings)
         {
             _modbusSession = new ModbusTcpSession(modbusProtocol, _settings.ParentSlaveAddress);
@@ -15,10 +17,17 @@ namespace Modbus.Core
 
             if (settings.ParentSlaveAddress == Constants.UndefinedSlaveAddress)
                 throw new ArgumentException("ParentSlaveAddress must be defined", nameof(settings));
+
+            State = settings.ChildSlaveAddress != Constants.UndefinedSlaveAddress
+                ? SessionState.Identified
+                : SessionState.Unidentified;
         }
 
         public Response<T> SendRequest<T>(int functionCode, object data) where T : struct
         {
+            if (State == SessionState.Unidentified)
+                throw new InvalidOperationException("Slave address must be defined");
+
             var builder = new RtuRequest.Builder()
                 .SetFunctionCode(functionCode)
                 .SetObject(data);
@@ -28,8 +37,12 @@ namespace Modbus.Core
 
         public Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct
         {
-            if (_settings.ChildSlaveAddress != Constants.UndefinedSlaveAddress)
+            if (State == SessionState.Expired)
+                throw new InvalidOperationException("This session already expired");
+
+            if (State == SessionState.Identified)
                 builder.SetSlaveAddress(_settings.ChildSlaveAddress);
+
             var requestBytes = builder.Build().RequestBytes;
 
             var parentBuilder = new TcpRequest.Builder()
@@ -51,6 +64,7 @@ namespace Modbus.Core
 
         public void Dispose()
         {
+            State = SessionState.Expired;
             _modbusSession?.Dispose();
         }
 

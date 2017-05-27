@@ -5,6 +5,8 @@ namespace Modbus.Core
 {
     public interface IModbusSession : IDisposable
     {
+        SessionState State { get; }
+
         Response<T> SendRequest<T>(int functionCode, object data) where T : struct;
 
         Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct;
