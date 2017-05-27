@@ -64,9 +64,11 @@ namespace Modbus.Core
 
         private void CheckResponse<T>(Request request, TcpResponse<T> response) where T : struct
         {
-            if (_transactionId != response.TransactionId)
+            var tcpRequest = (TcpRequest)request;
+
+            if (tcpRequest.TransactionId != response.TransactionId)
                 throw new DataCorruptedException("Response transaction id does not match " + _transactionId);
-            if (response.ProtocolId != PROTOCOL_ID)
+            if (tcpRequest.ProtocolId != response.ProtocolId)
                 throw new DataCorruptedException("Response protocol id does not match " + PROTOCOL_ID);
             if (response.ComputeMessageLength() != response.Length)
                 throw new DataCorruptedException("Actual message bytes length does not match " + response.Length);
