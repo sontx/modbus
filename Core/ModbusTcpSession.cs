@@ -31,7 +31,7 @@ namespace Modbus.Core
             var tcpBuilder = (TcpRequest.Builder)builder;
 
             tcpBuilder
-                .SetTransactionId(_transactionId++)
+                .SetTransactionId(++_transactionId)
                 .SetProtocolId(PROTOCOL_ID)
                 .AutoComputeLength();
 
