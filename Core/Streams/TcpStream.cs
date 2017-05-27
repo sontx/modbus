@@ -39,6 +39,7 @@ namespace Modbus.Core.Streams
             while (_networkStream.DataAvailable)
                 _networkStream.ReadByte();
             _networkStream.Write(buffer, offset, length);
+            _networkStream.Flush();
         }
 
         public TcpStream(TcpClient tcpClient)
