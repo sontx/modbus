@@ -7,6 +7,8 @@ namespace Modbus.Core
     {
         SessionState State { get; }
 
+        bool EnableCheck { get; set; }
+
         Response<T> SendRequest<T>(int functionCode, object data) where T : struct;
 
         Response<T> SendRequest<T>(Request.BuilderBase builder) where T : struct;

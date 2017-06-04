@@ -11,6 +11,8 @@ namespace Modbus.Core
 
         public SessionState State { get; private set; }
 
+        public bool EnableCheck { get; set; } = true;
+
         public ModbusRtuSession(IModbusProtocol modbusProtocol, int slaveAddress)
         {
             _modbusProtocol = modbusProtocol;
@@ -53,7 +55,8 @@ namespace Modbus.Core
                 .SetResponseBytes(responseBytes)
                 .Build();
 
-            CheckResponse(request, responseBytes, response);
+            if (EnableCheck)
+                CheckResponse(request, responseBytes, response);
 
             return response;
         }
@@ -68,18 +71,23 @@ namespace Modbus.Core
             return Task.Run(() => SendRequest<T>(builder));
         }
 
-        private void CheckResponse<T>(Request request, byte[] responseBytes, Response<T> response)
-            where T : struct
+        public static void CheckResponse<T>(int slaveAddress, int functionCode, byte[] responseBytes, Response<T> response) where T : struct
         {
             Checksum<T>(responseBytes);
 
-            if (request.SlaveAddress != response.SlaveAddress)
-                throw new MismatchDataException("Response slave address mismatch with " + request.SlaveAddress);
-            if (request.FunctionCode != response.FunctionCode)
-                throw new MismatchDataException("Response function code mismatch with " + request.FunctionCode);
+            if (slaveAddress != response.SlaveAddress)
+                throw new MismatchDataException("Response slave address mismatch with " + slaveAddress);
+            if (functionCode != response.FunctionCode)
+                throw new MismatchDataException("Response function code mismatch with " + functionCode);
         }
 
-        private void Checksum<T>(byte[] responseBytes) where T : struct
+        private static void CheckResponse<T>(Request request, byte[] responseBytes, Response<T> response)
+            where T : struct
+        {
+            CheckResponse(request.SlaveAddress, request.FunctionCode, responseBytes, response);
+        }
+
+        private static void Checksum<T>(byte[] responseBytes) where T : struct
         {
             var crc16 = Core.Checksum.ComputeCrc16(responseBytes, 0, responseBytes.Length - 2);
             if (crc16[0] != responseBytes[responseBytes.Length - 2] || crc16[1] != responseBytes[responseBytes.Length - 1])

@@ -20,5 +20,16 @@ namespace Modbus.Core
         {
             return new ModbusTcpSession(new ModbusProtocolImpl(new TcpStream(tcpClient)));
         }
+
+        public static IModbusSession CreateFwdSession(TcpClient tcpClient, ModbusFwdSession.Settings settings)
+        {
+            return new ModbusFwdSession(new ModbusProtocolImpl(new TcpStream(tcpClient)), settings);
+        }
+
+        internal static IModbusSession CreateFwdSession(TcpClient tcpClient)
+        {
+            var settings = new ModbusFwdSession.Settings();
+            return new ModbusFwdSession(new ModbusProtocolImpl(new TcpStream(tcpClient)), settings);
+        }
     }
 }

@@ -17,6 +17,9 @@ namespace Modbus.Core
             protected byte functionCode;
             protected byte[] data;
 
+            public byte SlaveAddress => slaveAddress;
+            public byte FunctionCode => functionCode;
+
             public BuilderBase SetSlaveAddress(int slaveAddress)
             {
                 this.slaveAddress = (byte)slaveAddress;

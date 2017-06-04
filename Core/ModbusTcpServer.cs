@@ -11,11 +11,13 @@ namespace Modbus.Core
 
         public ModbusTcpServer(string address, int port)
         {
-            var endPoint = new IPEndPoint(string.IsNullOrEmpty(address) ? IPAddress.Any : IPAddress.Parse(address), port);
+            var endPoint = new IPEndPoint(string.IsNullOrEmpty(address) ? IPAddress.Any : IPAddress.Parse(address),
+                port);
             _tcpListener = new TcpListener(endPoint);
         }
 
-        public Task WaitForConnectionsAsync(Action<IModbusSession> onAcceptAction, HandshakeFunc<DefaultHandshake> handshakeFunc)
+        public Task WaitForConnectionsAsync(Action<IModbusSession> onAcceptAction,
+            HandshakeFunc<DefaultHandshake> handshakeFunc, bool supportForwardProtocol = false)
         {
             return Task.Run(async () =>
             {
@@ -27,16 +29,29 @@ namespace Modbus.Core
                 while (true)
                 {
                     var tcpClient = await listner.AcceptTcpClientAsync();
-                    var modbusSession = ModbusSessionFactory.CreateTcpSession(tcpClient);
-                    var handshake = handshakeFunc.Invoke(modbusSession);
-                    if (handshake != null)
+
+                    if (supportForwardProtocol)
                     {
-                        ((ModbusTcpSession)modbusSession).SetSlaveAddress(handshake.SlaveAddress);
-                        onAcceptAction.Invoke(modbusSession);
+                        var modbusSession = ModbusSessionFactory.CreateFwdSession(tcpClient);
+                        var handshake = handshakeFunc.Invoke(modbusSession);
+                        if (handshake != null)
+                            onAcceptAction.Invoke(modbusSession);
+                        else
+                            modbusSession.Dispose();
                     }
                     else
                     {
-                        modbusSession.Dispose();
+                        var modbusSession = ModbusSessionFactory.CreateTcpSession(tcpClient);
+                        var handshake = handshakeFunc.Invoke(modbusSession);
+                        if (handshake != null)
+                        {
+                            ((ModbusTcpSession) modbusSession).SetSlaveAddress(handshake.SlaveAddress);
+                            onAcceptAction.Invoke(modbusSession);
+                        }
+                        else
+                        {
+                            modbusSession.Dispose();
+                        }
                     }
                 }
             });

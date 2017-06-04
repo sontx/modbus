@@ -14,6 +14,8 @@ namespace Modbus.Core
 
         public SessionState State { get; private set; }
 
+        public bool EnableCheck { get; set; } = true;
+
         public ModbusTcpSession(IModbusProtocol modbusProtocol, int slaveAddress)
         {
             _modbusProtocol = modbusProtocol;
@@ -47,7 +49,7 @@ namespace Modbus.Core
             if (State == SessionState.Unidentified)
                 throw new InvalidOperationException("Slave address must be defined");
 
-            var builder = (TcpRequest.Builder)new TcpRequest.Builder()
+            var builder = (TcpRequest.Builder) new TcpRequest.Builder()
                 .SetFunctionCode(functionCode)
                 .SetObject(data);
 
@@ -62,7 +64,7 @@ namespace Modbus.Core
             if (State == SessionState.Identified)
                 builder.SetSlaveAddress(_slaveAddress);
 
-            var tcpBuilder = (TcpRequest.Builder)builder;
+            var tcpBuilder = (TcpRequest.Builder) builder;
 
             tcpBuilder
                 .SetTransactionId(++_transactionId)
@@ -77,11 +79,12 @@ namespace Modbus.Core
             if (responseBytes == null)
                 return null;
 
-            var response = (TcpResponse<T>)new TcpResponse<T>.Builder()
+            var response = (TcpResponse<T>) new TcpResponse<T>.Builder()
                 .SetResponseBytes(responseBytes)
                 .Build();
 
-            CheckResponse(request, response);
+            if (EnableCheck)
+                CheckResponse(request, response);
 
             return response;
         }
@@ -98,7 +101,7 @@ namespace Modbus.Core
 
         private void CheckResponse<T>(Request request, TcpResponse<T> response) where T : struct
         {
-            var tcpRequest = (TcpRequest)request;
+            var tcpRequest = (TcpRequest) request;
 
             if (tcpRequest.TransactionId != response.TransactionId)
                 throw new DataCorruptedException("Response transaction id does not match " + _transactionId);
