@@ -4,7 +4,10 @@ Modbus library support for [Modbus Protocol](http://www.simplymodbus.ca/FAQ.htm)
 
 # Install
 
-You can clone/download source code from this repository and then add to your project. I will deliver a release in nuget as soon as possible.
+You can clone/download source code from this repository and then add to your project. Or install via Nuget:
+```
+Install-Package Modbus
+```
 
 # Usage
 
