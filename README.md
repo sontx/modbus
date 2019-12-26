@@ -1,6 +1,6 @@
 # Modbus
 
-Modbus library support for [Modbus Protocol](http://www.simplymodbus.ca/FAQ.htm) develops base on C# and Net Framework 4.5.
+Modbus library supports for [Modbus Protocol](http://www.simplymodbus.ca/FAQ.htm).
 
 # Install
 
