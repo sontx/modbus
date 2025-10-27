@@ -1,5 +1,4 @@
 ﻿using CommandLine;
-using CommandLine.Text;
 
 namespace Modbus.Terminal
 {
@@ -8,16 +7,10 @@ namespace Modbus.Terminal
         [Option("address", Required = true, HelpText = "Listen address")]
         public string Address { get; set; }
 
-        [Option("port", DefaultValue = 3393, HelpText = "Listen port")]
+        [Option("port", Default = 3393, HelpText = "Listen port")]
         public int Port { get; set; }
 
-        [Option("interval", DefaultValue = 1000, HelpText = "Loop every in milliseconds")]
+        [Option("interval", Default = 1000, HelpText = "Loop every in milliseconds")]
         public int Interval { get; set; }
-
-        [HelpOption]
-        public string GetUsage()
-        {
-            return HelpText.AutoBuild(this, (HelpText current) => HelpText.DefaultParsingErrorsHandler(this, current));
-        }
     }
 }

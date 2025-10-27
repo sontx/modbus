@@ -28,25 +28,25 @@ namespace Modbus.Terminal
 
         private static void Main(string[] args)
         {
-            var options = new PortOptions();
-            if (!Parser.Default.ParseArguments(args, options))
-                return;
+            Parser.Default.ParseArguments<PortOptions>(args)
+                .WithParsed<PortOptions>(options =>
+                {
+                    SerialPort serialPort = new SerialPort(options.Com, options.BaudRate);
+                    if (!serialPort.IsOpen)
+                        serialPort.Open();
 
-            SerialPort serialPort = new SerialPort(options.Com, options.BaudRate);
-            if (!serialPort.IsOpen)
-                serialPort.Open();
+                    var stream = new SerialStream(serialPort);
+                    stream.ReadTimeout = 5000;
+                    ModbusRtuSession session = new ModbusRtuSession(new ModbusProtocolImpl(stream), 1);
 
-            var stream = new SerialStream(serialPort);
-            stream.ReadTimeout = 5000;
-            ModbusRtuSession session = new ModbusRtuSession(new ModbusProtocolImpl(stream));
+                    RequestFunc03 func03 = new RequestFunc03();
+                    func03.firstRegisterAddress = 0;
+                    func03.numberOfRegisters = 4;
 
-            RequestFunc03 func03 = new RequestFunc03();
-            func03.firstRegisterAddress = 0;
-            func03.numberOfRegisters = 4;
+                    var response = session.SendRequest<ResponseFunc03>(3, func03);
 
-            var response = session.SendRequest<ResponseFunc03>(1, 3, func03);
-
-            Console.Read();
+                    Console.Read();
+                });
         }
     }
 }
